@@ -88,3 +88,11 @@ shared_ptr<Good> bad = not_so_good->getptr();     // don't do this
 }
 ```
 
+
+# Policy class
+
+软件设计的多样性，由此引出如何在程序库中包装出弹性又有优良设计的组件这一问题？
+- DoItAll接口： 庞大的class难以阅读，而且死板。
+- 多重继承：技术，型别信息，状态处理上有特定问题
+
+解决方案：templates+多重继承。

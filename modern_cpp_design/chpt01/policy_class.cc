@@ -14,6 +14,7 @@ public:
   }
 };
 
+// Policy classes
 template<typename T>
 class OpCreator {
 public:
@@ -21,8 +22,31 @@ public:
     std::cout << "Create." << std::endl;
     return new T;
   }
+protected:
+  // deconstructor is created as protected to avoid following case:
+  // MyWidgetMr wm;
+  // OpCreator<Widget>* pCreator = &wm; // dubious but legal
+  // delete wm; // compiles fine but undefined behavior
+  ~OpCreator() {
+    std::cout << "Deconstruct OpCreator" << std::endl;
+  }
 };
 
+template<typename T>
+class PrototypeCreator {
+public:
+  PrototypeCreator(T* pObj = nullptr) : pPrototype_(pObj) {}
+  T* Create() {
+    return pPrototype_? pPrototype_->Clone() : nullptr;
+  }
+  T* GetProtoType() {return pPrototype_;}
+  void SetProtoType(T* pObj) {pPrototype_ = pObj;}
+
+private:
+  T* pPrototype_;
+};
+
+// host classes
 template<class CreatePolicy>
 class WidgetManager : public CreatePolicy {
 public:
@@ -31,6 +55,7 @@ public:
   }
 
   void DoSomething() {
+    // Limitation:
     // Cannot initialize another type with CreatePolicy
     // Gadget* pw = CreatePolicy<Gadget>().Create();
     std::cout << "DoSomething." << std::endl;
@@ -46,10 +71,17 @@ public:
     std::cout << "initialize TemplatedWidgetManager." << std::endl;
   }
 
-  Gadget* DoSomething() {
-    Gadget* pw = CreatePolicy<Gadget>().Create();
+  void DoSomething() {
+    // XXX: with protected dtor, following code got an error.
+    /* Gadget* pw = CreatePolicy<Gadget>().Create(); */
     std::cout << "DoSomething." << std::endl;
-    return pw;
+  }
+
+  void SwitchProtoType(Widget* pNewPrototype) {
+    std::cout << "SwitchProtoType" << std::endl;
+    CreatePolicy<Widget>& myPolicy = *this;
+    delete myPolicy.GetProtoType();
+    myPolicy.SetProtoType(pNewPrototype);
   }
 };
 
@@ -64,5 +96,16 @@ int main() {
   std::cout << "==create my_template_widget.==" << std::endl;
   auto my_templated_widget = my_templated_widget_mr.Create();
   std::cout << "==create my_template_gadget.==" << std::endl;
-  auto my_templated_gadget = my_templated_widget_mr.DoSomething();
+  my_templated_widget_mr.DoSomething();
+
+  std::cout << "==another policy.==" << std::endl;
+  auto my_templated_widget_mr_proto = TemplatedWidgetManager<PrototypeCreator>();
+  auto* new_widget = new Widget();
+  my_templated_widget_mr_proto.SwitchProtoType(new_widget);
+
+  // OpCreator policy has no GetProtoType/SetProtoType interface
+  // and it is still compilable with SwitchProtoType member function.
+  auto my_templated_widget_mr_op = TemplatedWidgetManager<OpCreator>();
+  // But call SwitchProtoType with OpCreator Policy will cause an error.
+  // my_templated_widget_mr_op.SwitchProtoType(new_widget);
 }
