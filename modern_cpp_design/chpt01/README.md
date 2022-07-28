@@ -96,3 +96,8 @@ shared_ptr<Good> bad = not_so_good->getptr();     // don't do this
 - 多重继承：技术，型别信息，状态处理上有特定问题
 
 解决方案：templates+多重继承。
+
+
+## example:
+
+PyTorch: torch/csrc/jit/api/module.h
