@@ -3,8 +3,6 @@
 #define TYPELIST_2(T1, T2) TL::Typelist<T1, TYPELIST_1(T2)>
 #define TYPELIST_3(T1, T2, T3) TL::Typelist<T1, TYPELIST_2(T2, T3)>
 #define TYPELIST_4(T1, T2, T3, T4) TL::Typelist<T1, TYPELIST_3(T2, T3, T4)>
-
-
 namespace TL {
   class NullType{};
 
@@ -14,8 +12,8 @@ namespace TL {
     typedef U Tail;
   };
 
+  // TypeList Length
   template <typename TList> struct Length;
-
   // Following is not correct partial specialize
   // template <T> struct Length<NullType> {
   // 特例化版本的参数类型必须与一个先前声明的模板中对应的类型相匹配
@@ -25,6 +23,19 @@ namespace TL {
 
   template <typename T, typename U> struct Length<Typelist<T, U>> {
     enum {value = 1 + Length<U>::value};
+  };
+
+  // TypeList Length
+  template<typename T, unsigned int index>
+  struct IndexAt;
+
+  template<typename T, typename U, unsigned int index>
+  struct IndexAt<Typelist<T, U>, index> {
+    typedef typename IndexAt<U, index-1>::result result;
+  };
+  template<typename T, typename U>
+  struct IndexAt<Typelist<T, U>, 0> {
+    typedef T result;
   };
 }
 
