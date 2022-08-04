@@ -25,7 +25,7 @@ namespace TL {
     enum {value = 1 + Length<U>::value};
   };
 
-  // TypeList Length
+  // TypeList IndexAt
   template<typename T, unsigned int index>
   struct IndexAt;
 
@@ -36,6 +36,43 @@ namespace TL {
   template<typename T, typename U>
   struct IndexAt<Typelist<T, U>, 0> {
     typedef T result;
+  };
+
+  // TypeList IndexOf
+  template<typename TList, typename Indexed>
+  struct IndexOf;
+
+  template<typename T, typename U, typename Indexed>
+  struct IndexOf<Typelist<T, U>, Indexed> {
+  private:
+    enum {temp = IndexOf<U, Indexed>::value};
+  public:
+    enum {value = temp == -1 ? -1 : 1 + temp};
+  };
+  template<typename T, typename U>
+  struct IndexOf<Typelist<T, U>, T> {
+    enum {value = 0};
+  };
+  template<typename Indexed>
+  struct IndexOf<NullType, Indexed> {
+    enum {value = -1};
+  };
+
+  // TypeList Append
+  template<typename TList, typename ToAppend>
+  struct Append;
+
+  template<typename T, typename U, typename ToAppend>
+  struct Append<Typelist<T, U>, ToAppend> {
+    typedef Typelist<T, typename Append<U,ToAppend>::Result> Result;
+  };
+  template<>
+  struct Append<NullType, NullType> {
+    typedef NullType Result;
+  };
+  template<typename ToAppend>
+  struct Append<NullType, ToAppend> {
+    typedef Typelist<ToAppend, NullType> Result;
   };
 }
 

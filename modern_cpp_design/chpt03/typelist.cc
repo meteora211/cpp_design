@@ -16,4 +16,10 @@ int main() {
   std::cout << TL::Length<Floats>::value << std::endl;
 
   typename TL::IndexAt<UnsignedInts, 2>::result i;
+
+  std::cout << TL::IndexOf<UnsignedInts, unsigned char>::value << std::endl;
+  std::cout << TL::IndexOf<UnsignedInts, unsigned int>::value << std::endl;
+  std::cout << TL::IndexOf<UnsignedInts, int>::value << std::endl;
+
+  std::cout << TL::IndexOf<TL::Append<UnsignedInts, float>::Result, float>::value << std::endl;
 }
