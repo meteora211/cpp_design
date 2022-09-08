@@ -34,21 +34,37 @@ public:
   virtual ~FunctorImpl() {}
 };
 
-/* template <typename Incoming> */
-/* class BindFirst : */
-/*   public FunctorImpl < */
-/*   typename Incoming::ResultType, */
-/*   typename Incoming::ParamType> { */
+// It should derived from FunctorImpl <typename Incoming::ResultType, typename Incoming::ParamList::Tail>
+// instead of             FunctorImpl <typename Incoming::ResultType, typename Incoming::ParamList>
+// Find the type casting in function BindFirst.
+template <typename Incoming>
+class BinderFirst :
+  public FunctorImpl <
+  typename Incoming::ResultType,
+  typename Incoming::ParamList::Tail> {
+public:
+  typedef typename Incoming::ResultType ResultType;
+  typedef typename Incoming::Param1 Bound;
+  typedef typename Incoming::Param2 Param1;
+  typedef typename Incoming::Param3 Param2;
 
-/* typedef */
+  BinderFirst(Incoming func, Bound bound) :
+    func_(func), bound_(bound)
+  {}
 
-/* public: */
-/*   BindFirst(Incoming func, Bound bound) : */
-/*     func_(func), bound_(bound) */
-/*   {} */
+  ResultType operator()() {
+    return func_(bound_);
+  }
 
-/* private: */
-/*   Incoming func_; */
-/*   Bound bound_; */
+  ResultType operator()(Param1 param1) {
+    return func_(bound_, param1);
+  }
 
-/* } */
+  ResultType operator()(Param1 param1, Param2 param2) {
+    return func_(bound_, param1, param2);
+  }
+
+private:
+  Incoming func_;
+  Bound bound_;
+};

@@ -43,5 +43,6 @@ int main() {
   Functor<std::string, NullType> fun5(&TestCastFunction);
   std::cout << fun5().substr(3) << std::endl;
 
-  /* Functor<void> binded_func(BindFirst(func, 10)); */
+  Functor<void, TYPELIST_1(int)> binded_func(BindFirst(fun4, 10));
+  binded_func(11);
 }
